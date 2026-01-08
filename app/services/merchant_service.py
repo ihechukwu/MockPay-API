@@ -30,5 +30,5 @@ class MerchantService:
 
         statement = select(Merchant).where(Merchant.email == email)
         result = await session.execute(statement)
-        merchant = await result.scalar_one_or_none()
+        merchant = result.scalar_one_or_none()
         return merchant

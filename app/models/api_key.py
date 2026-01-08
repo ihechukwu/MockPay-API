@@ -10,7 +10,7 @@ class ApiKey(SQLModel, table=True):
 
     __tablename__ = "api_keys"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, unique=True, primary_key=True)
-    merchant_id: uuid.UUID = ForeignKey("merchants.id", ondelete=CASCADE)
+    merchant_id: uuid.UUID = Field(foreign_key="merchants.id", ondelete=CASCADE)
     api_key_hash: str
     is_active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)

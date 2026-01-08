@@ -7,3 +7,9 @@ class MerchantCreate(BaseModel):
     last_name: str
     email: EmailStr
     password: str
+
+
+class MerchantLogin(BaseModel):
+
+    email: EmailStr
+    password: str
