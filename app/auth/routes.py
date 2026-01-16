@@ -3,9 +3,10 @@ from app.schemas.merchant import MerchantLogin
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.services.merchant_service import MerchantService
 from app.core.database import get_session
-from .utils import create_access_token, verify_password_hash
+from .utils import create_access_token, verify_password_hash, decode_url_safe_token
 from datetime import timedelta
 from app.core.config import settings
+from app.core.database import get_session
 
 
 auths_router = APIRouter()
@@ -39,3 +40,14 @@ async def login(
     )
 
     return {"Access Token": access_token, "Refresh Token": refresh_token}
+
+
+@auths_router.get("/verify-email")
+async def verify_email(token: str, session: AsyncSession = Depends(get_session)):
+
+    token_data = decode_url_safe_token(token)
+
+    await merchant_service.verify_merchant_by_email(
+        token_data.get("email"), session=session
+    )
+    return {"msg": "your account has been verified"}

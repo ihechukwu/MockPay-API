@@ -6,6 +6,7 @@ from app.core.config import settings
 from jwt.exceptions import PyJWTError
 from fastapi import HTTPException, status
 import uuid
+from itsdangerous import URLSafeTimedSerializer
 
 
 password_hash = PasswordHash.recommended()
@@ -53,4 +54,23 @@ def decode_access_token(token: str):
         return payload
 
     except PyJWTError:
+        raise credentials_exception
+
+
+token_serializer = URLSafeTimedSerializer(
+    secret_key=SECRET_KEY, salt="email-verification"
+)
+
+
+def create_url_safe_token(data: dict):
+    token = token_serializer.dumps(data)
+    return token
+
+
+def decode_url_safe_token(token: str):
+    try:
+        token_data = token_serializer.loads(token)
+        return token_data
+
+    except Exception:
         raise credentials_exception

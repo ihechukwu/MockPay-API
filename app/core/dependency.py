@@ -38,7 +38,7 @@ class TokenBearer(HTTPBearer):
 
 
 class AccessTokenBearer(TokenBearer):
-    def verify_access_token(payload: dict):
+    def verify_access_token(self, payload: dict):
         if payload and payload["refresh"]:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Provide access token"
@@ -46,7 +46,7 @@ class AccessTokenBearer(TokenBearer):
 
 
 class RefreshTokenBearer(TokenBearer):
-    def verify_access_token(payload: dict):
+    def verify_access_token(self, payload: dict):
         if payload and not payload["refresh"]:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Provide refresh token"
@@ -57,7 +57,7 @@ async def get_current_user(
     merchant: dict = Depends(AccessTokenBearer()),
     session: AsyncSession = Depends(get_session),
 ):
-    merchant_email = merchant.email
+    merchant_email = merchant.get("merchant_email")
     merchant = await merchant_service.get_merchant_by_email(merchant_email, session)
 
     return merchant

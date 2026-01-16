@@ -32,3 +32,15 @@ class MerchantService:
         result = await session.execute(statement)
         merchant = result.scalar_one_or_none()
         return merchant
+
+    async def verify_merchant_by_email(self, email: EmailStr, session: AsyncSession):
+
+        merchant = await self.get_merchant_by_email(email=email, session=session)
+
+        if merchant.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="User already verified "
+            )
+
+        merchant.is_verified = True
+        await session.commit()
