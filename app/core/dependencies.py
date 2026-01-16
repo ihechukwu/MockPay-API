@@ -6,9 +6,14 @@ from app.services import merchant_service
 from .database import get_session
 from app.auth.utils import decode_access_token
 from app.services.merchant_service import MerchantService
+from app.services.api_keys_service import ApiKeyService
+from app.core.security import hash_api_key
+from datetime import datetime
 
 
 merchant_service = MerchantService()
+api_key_service = ApiKeyService()
+bearer_scheme = HTTPBearer(auto_error=True)
 
 
 class TokenBearer(HTTPBearer):
@@ -73,3 +78,29 @@ class RoleChecker:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Access Denied"
             )
+
+
+async def api_key_auth(
+    cred: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    session: AsyncSession = Depends(get_session),
+):
+
+    raw_key = cred.credentials
+    if not raw_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing Key"
+        )
+
+    api_hashed_key = await api_key_service.get_api_key_hash(
+        hash=hash_api_key(raw_key), session=session
+    )
+
+    if not api_hashed_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or revoked key"
+        )
+
+    api_hashed_key.last_used_at = datetime.utcnow()
+    await session.commit()
+
+    return api_hashed_key.merchant_id

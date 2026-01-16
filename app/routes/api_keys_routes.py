@@ -2,7 +2,7 @@ from app.core.security import generate_api_key, hash_api_key
 from fastapi import Depends, APIRouter
 from app.core.database import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.core.dependency import get_current_user
+from app.core.dependencies import get_current_user
 from app.services.api_keys_service import ApiKeyService
 
 api_keys_routers = APIRouter()

@@ -56,7 +56,7 @@ class ApiKeyService:
             statement = select(ApiKey).where(ApiKey.merchant_id == merchant_id)
 
         elif hash:
-            statement = statement.where(ApiKey.api_key_hash == hash)
+            statement = select(ApiKey).where(ApiKey.api_key_hash == hash)
 
         result = await session.execute(statement)
         return result.scalar_one_or_none()
